@@ -10,7 +10,8 @@
                  [org.clojure/clojurescript "1.10.520"]
                  [org.clojure/core.async  "0.4.500"]
                  [cljs-http "0.1.46"]
-                 [reagent "0.8.1"]]
+                 [reagent "0.8.1"]
+                 [clj-commons/secretary "1.2.4"]]
 
   :plugins [[lein-figwheel "0.5.19"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]

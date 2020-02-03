@@ -7,8 +7,6 @@
 
 (println "This text is printed from src/nhl-app/core.cljs. Go ahead and edit it and see reloading in action.")
 
-;; define your app data so that it doesn't get over-written on reload
-
 (defonce nhl-teams (atom {:teams []}))
 
 (defn load-teams-in-state []
@@ -16,12 +14,15 @@
 
 (defn render-teams-list []
   (let [teams (:teams @nhl-teams)]
-    (for [team teams] ^{:key (:teamName team)} [:li (:name team)])))
+    (for [team teams] ^{:key (:teamName team)} [:li.team
+                                                [:input {:type "button"
+                                                         :value (:name team)}]])))
+(defn teams-component []
+  [:div.teams-div
+   [:ul.team-list (if (empty? (:teams @nhl-teams)) (load-teams-in-state) (render-teams-list))]])
 
 (defn nhl-app []
-  [:div
-   [:ul (if (empty? (:teams @nhl-teams)) (load-teams-in-state) (render-teams-list))]
-   [:h3 "Choose a team"]])
+  [teams-component])
 
 (reagent/render-component [nhl-app]
                           (. js/document (getElementById "app")))

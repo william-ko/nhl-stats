@@ -1,2 +1,14 @@
 /* some style */
+.teams-div {
+    display: flex;
+    justify-content: center;
+}
 
+.team-list {
+    list-style: none;
+    text-align: center;
+}
+
+.team {
+    margin: .5em;
+}
