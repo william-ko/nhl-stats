@@ -9,6 +9,7 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/clojurescript "1.10.520"]
                  [org.clojure/core.async  "0.4.500"]
+                 [cljs-http "0.1.46"]
                  [reagent "0.8.1"]]
 
   :plugins [[lein-figwheel "0.5.19"]
