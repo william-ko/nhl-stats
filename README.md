@@ -1,10 +1,6 @@
 # nhl-app
 
-FIXME: Write a one-line description of your library/project.
-
-## Overview
-
-FIXME: Write a paragraph about the library/project and highlight its goals.
+A quick app written in ClojureScript that pulls data from the undocumented NHL API and (as of now) let's you select a team and view their stats. I like to use this API when experimenting with new frameworks as the data structures can be fun, complex and intricately linked.
 
 ## Setup
 
