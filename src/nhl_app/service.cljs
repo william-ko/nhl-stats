@@ -3,6 +3,7 @@
   (:require [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]))
 
+;; TODO: Make these routes
 (defn get-teams
   []
   (go (let [response (<! (http/get "https://statsapi.web.nhl.com/api/v1/teams"
