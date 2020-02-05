@@ -61,6 +61,7 @@
               :on-click #(swap! state update :app-page assoc :page :teams)}]]]))
 
 (defn teams-component []
+  (swap! state update :stats assoc :data {})
   [:div.teams-div
    [:ul.team-list (if (empty? (:teams @state)) (load-teams-in-state) (render-teams-list))]])
 
