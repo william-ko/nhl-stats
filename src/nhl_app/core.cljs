@@ -7,18 +7,16 @@
             [secretary.core :as secretary]
             [goog.events :as events]
             [goog.history.EventType :as EventType]
-            [reagent.core :as reagent]))
+            [reagent.core :as reagent]
+            [clojure.string :as str]))
 
 (enable-console-print!)
-
-(println "This text is printed from src/nhl-app/core.cljs. Go ahead and edit it and see reloading in action.")
 
 (defonce state (atom {:teams    []
                       :stats    {}
                       :app-page {}}))
 
 ;; render and state functions ;;
-;; TODO: DRY this up
 (defn load-teams-in-state []
   (take! (service/get-teams) (fn [teams] (doseq [team teams] (swap! state update :teams conj team)))))
 
@@ -33,32 +31,30 @@
                                                          :on-click #(swap! state update :app-page assoc :page :team-stats
                                                                            (load-stats-in-state (:link team)))}]])))
 
-;; TEMP for styling purposes - render this programmatically
+;; TODO: Capitalize first letter of each label
+(defn keys->labels
+  "Transforms map keys into readable text"
+  [key]
+  (let [key-split (str/split (str/replace key #"^:" "") #"(?=[A-Z])")]
+    (str/join " " key-split)))
+
 (defn render-stats [stats team-stats league-stats]
-  (println team-stats)
+  "Renders stats on the page by key value pairs"
   [:ul.stats-list
-   [:li (str "Games Played: " (:gamesPlayed team-stats))]
-   [:li (str "Points: " (:pts team-stats))]
-   [:li (str "Wins: " (:wins team-stats))]
-   [:li (str "Losses: " (:losses team-stats))]
-   [:li (str "OT: " (:ot team-stats))]
-   [:li (str "Save Percentage: " (:savePctg team-stats))]
-   [:li (str "Goals Against per Game: " (:goalsAgainstPerGame team-stats))]
-   [:li (str "Power Play Goals: " (:powerPlayGoals team-stats))]
-   [:li (str "Shots per Game: " (:shotsPerGame team-stats))]])
+   (map (fn [[key value]] ^{:key key} [:li (keys->labels (str key))": " value]) team-stats)])
 
 ;; components ;;
 (defn teams-stats-component []
   (let [stats        (:splits (first (get-in @state [:stats :data])))
         team-stats   (:stat (first stats))
         league-stats (:stat (second stats))]
-   [:div.stats-div
-    [:h1 (:name (:team (second stats)))]
-    (if-not (empty? (:stats @state)) (render-stats stats team-stats league-stats))
-    [:div.stats-button
-     [:input {:type     "button"
-              :value    (str "Back")
-              :on-click #(swap! state update :app-page assoc :page :teams)}]]]))
+    [:div.stats-div
+     [:h1 (:name (:team (second stats)))]
+     (if-not (empty? (:stats @state)) (render-stats stats team-stats league-stats))
+     [:div.stats-button
+      [:input {:type     "button"
+               :value    (str "Back")
+               :on-click #(swap! state update :app-page assoc :page :teams)}]]]))
 
 (defn teams-component []
   [:div.teams-div

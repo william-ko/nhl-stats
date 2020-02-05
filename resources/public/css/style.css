@@ -5,6 +5,10 @@ div {
     flex-direction: column;
 }
 
+ul {
+    list-style: none;
+}
+
 
 .stats-div {
     text-align: left;
@@ -14,8 +18,8 @@ div {
     text-align: center;
 }
 
-.stats-list {
-    list-style: none;
+.stats-list li {
+    margin-top: .25em;
 }
 
 .stats-button {
@@ -25,8 +29,11 @@ div {
 
 
 .team-list {
-    list-style: none;
     text-align: center;
+}
+
+.team input {
+    width: 10%;
 }
 
 .team {
