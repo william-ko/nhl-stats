@@ -14,47 +14,56 @@
 
 (defonce state (atom {:teams    []
                       :stats    {}
+                      :roster   {}
                       :app-page {}}))
 
-;; render and state functions ;;
-(defn load-teams-in-state []
-  (take! (service/get-teams) (fn [teams] (doseq [team teams] (swap! state update :teams conj team)))))
-
-(defn load-stats-in-state [link]
-  (take! (service/get-team-stats link) (fn [stats] (swap! state update :stats assoc :data stats))))
-
-(defn render-teams-list []
-  (let [teams (:teams @state)]
-    (for [team teams] ^{:key (:teamName team)} [:li.team
-                                                [:input {:type     "button"
-                                                         :value    (:name team)
-                                                         :on-click #(swap! state update :app-page assoc :page :team-stats
-                                                                           (load-stats-in-state (:link team)))}]])))
-
-;; TODO: Capitalize first letter of each label
+;; utility functions ;;
 (defn keys->labels
   "Transforms map keys into readable text"
   [key]
   (let [key-split (str/split (str/replace key #"^:" "") #"(?=[A-Z])")]
     (str/join " " key-split)))
 
-(defn render-stats [stats team-stats league-stats]
+;; state functions ;;
+(defn load-teams-in-state []
+  (take! (service/get-teams) (fn [teams] (doseq [team teams] (swap! state update :teams conj team)))))
+
+(defn load-data-in-state
+  [channel key]
+  (take! channel (fn [data] (swap! state update key assoc :data data))))
+
+;; content rendering components ;;
+(defn render-teams-list []
+  (let [teams (:teams @state)]
+    (for [team teams] ^{:key (:teamName team)} [:li.team
+                                                [:input {:type     "button"
+                                                         :value    (:name team)
+                                                         :on-click #(swap! state update :app-page assoc :page :team-stats
+                                                                           (load-data-in-state (service/get-team-roster (:link team)) :roster)
+                                                                           (load-data-in-state (service/get-team-stats (:link team)) :stats))}]])))
+
+(defn render-stats
+  [stats team-stats league-stats]
   "Renders stats on the page by key value pairs"
   [:ul.stats-list
-   (map (fn [[key value]] ^{:key key} [:li (keys->labels (str key))": " value]) team-stats)])
+   (map (fn [[key value]] ^{:key key} [:li (keys->labels (str key)) ": " value]) team-stats)])
+
+(defn render-stats-content
+  [stats team-stats league-stats]
+  [:div.stats-div
+   [:h1 (:name (:team (second stats)))]
+   (if-not (empty? (:stats @state)) (render-stats stats team-stats league-stats))
+   [:div.stats-button
+    [:input {:type     "button"
+             :value    (str "Back")
+             :on-click #(swap! state update :app-page assoc :page :teams)}]]])
 
 ;; components ;;
-(defn teams-stats-component []
+(defn stats-component []
   (let [stats        (:splits (first (get-in @state [:stats :data])))
         team-stats   (:stat (first stats))
         league-stats (:stat (second stats))]
-    [:div.stats-div
-     [:h1 (:name (:team (second stats)))]
-     (if-not (empty? (:stats @state)) (render-stats stats team-stats league-stats))
-     [:div.stats-button
-      [:input {:type     "button"
-               :value    (str "Back")
-               :on-click #(swap! state update :app-page assoc :page :teams)}]]]))
+    (render-stats-content stats team-stats league-stats)))
 
 (defn teams-component []
   (swap! state update :stats assoc :data {})
@@ -85,7 +94,7 @@
   [teams-component])
 
 (defmethod current-page :team-stats []
-  [teams-stats-component])
+  [stats-component])
 
 (defn nhl-app []
   [current-page (app-routes)])
