@@ -1,32 +1,17 @@
 /* some style */
-div {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-}
-
 ul {
     list-style: none;
 }
 
-
-.stats-div {
-    text-align: left;
-}
-
-.stats-div h1{
+h1 {
     text-align: center;
 }
 
-.stats-list li {
-    margin-top: .25em;
+.teams-div {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
 }
-
-.stats-button {
-    margin: 2em auto 0;
-    width: 15%;
-}
-
 
 .team-list {
     text-align: center;
@@ -38,4 +23,27 @@ ul {
 
 .team {
     margin: .5em;
+}
+
+.stats-div {
+    display: flex;
+}
+
+.stats-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.roster-list  {
+    display: flex;
+    flex-direction: column;
+}
+
+.player-list  {
+    text-align: right;
+}
+
+.stats-button {
+    margin: 2em auto 0;
+    width: 15%;
 }
