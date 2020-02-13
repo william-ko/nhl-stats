@@ -32,15 +32,20 @@
   [channel key]
   (take! channel (fn [data] (swap! state update key assoc :data data))))
 
+(defn clear-state
+  []
+  (swap! state update :stats assoc :data {})
+  (swap! state update :roster assoc :data {}))
+
 ;; content rendering components ;;
 (defn render-teams-list []
   (let [teams (:teams @state)]
-    (for [team teams] ^{:key (:teamName team)} [:li.team
-                                                [:input {:type     "button"
-                                                         :value    (:name team)
-                                                         :on-click #(swap! state update :app-page assoc :page :team-stats
-                                                                           (load-data-in-state (service/get-team-roster (:link team)) :roster)
-                                                                           (load-data-in-state (service/get-team-stats (:link team)) :stats))}]])))
+    (for [team teams] ^{:key (:id team)} [:li.team
+                                          [:input {:type     "button"
+                                                   :value    (:name team)
+                                                   :on-click #(swap! state update :app-page assoc :page :team-stats
+                                                                     (load-data-in-state (service/get-team-roster (:link team)) :roster)
+                                                                     (load-data-in-state (service/get-team-stats (:link team)) :stats))}]])))
 
 (defn render-stats
   [stats team-stats league-stats]
@@ -48,25 +53,36 @@
   [:ul.stats-list
    (map (fn [[key value]] ^{:key key} [:li (keys->labels (str key)) ": " value]) team-stats)])
 
+(defn list-players
+  [player]
+  (println player)
+  [:li.player-list (str (get-in player [:person :fullName]))])
+
+(defn render-roster-content
+  [roster]
+  [:ul.roster-list
+   (map (fn [player] ^{:key (get-in player [:person :id])} (list-players player)) roster)])
+
 (defn render-stats-content
-  [stats team-stats league-stats]
+  [stats team-stats league-stats roster]
   [:div.stats-div
    [:h1 (:name (:team (second stats)))]
-   (if-not (empty? (:stats @state)) (render-stats stats team-stats league-stats))
+   (render-stats stats team-stats league-stats)
+   (render-roster-content (second roster))
    [:div.stats-button
     [:input {:type     "button"
              :value    (str "Back")
-             :on-click #(swap! state update :app-page assoc :page :teams)}]]])
+             :on-click #(swap! state update :app-page assoc :page :teams (clear-state))}]]])
 
 ;; components ;;
 (defn stats-component []
   (let [stats        (:splits (first (get-in @state [:stats :data])))
         team-stats   (:stat (first stats))
-        league-stats (:stat (second stats))]
-    (render-stats-content stats team-stats league-stats)))
+        league-stats (:stat (second stats))
+        roster       (first (get-in @state [:roster :data]))]
+    (if-not (empty? (:stats @state)) (render-stats-content stats team-stats league-stats roster))))
 
 (defn teams-component []
-  (swap! state update :stats assoc :data {})
   [:div.teams-div
    [:ul.team-list (if (empty? (:teams @state)) (load-teams-in-state) (render-teams-list))]])
 
